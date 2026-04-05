@@ -1,0 +1,49 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: friendloop-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-friendloop}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - friendloop-network
+
+  mongodb:
+    image: mongo:6-jammy
+    container_name: friendloop-mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-root}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-root}
+      MONGO_INITDB_DATABASE: ${MONGO_DB:-friendloop}
+    ports:
+      - "28017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - friendloop-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: friendloop-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - friendloop-network
+
+volumes:
+  postgres_data:
+  mongodb_data:
+  redis_data:
+
+
+networks:
+  friendloop-network:
+    driver: bridge

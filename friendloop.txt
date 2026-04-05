@@ -1,0 +1,50 @@
+friendloop/
+├── client/                     # Frontend (Next.js, TypeScript, TailwindCSS)
+│   ├── public/                 # Static assets (images, icons, fonts)
+│   ├── src/
+│   │   ├── app/                # Next.js App Router (Pages & API routes for SSR)
+│   │   │   ├── (auth)/         # Grouped routes for authentication
+│   │   │   ├── feed/           # Main feed page
+│   │   │   ├── profile/        # User profile pages
+│   │   │   ├── messages/       # Real-time chat interface
+│   │   │   └── layout.tsx      # Main application layout
+│   │   ├── components/         # Reusable UI components
+│   │   │   ├── ui/             # Generic atomic components (Buttons, Inputs, Modals)
+│   │   │   ├── post/           # Post-related components (PostCard, Creator, Comments)
+│   │   │   └── shared/         # Shared complex components (Navbar, Sidebar)
+│   │   ├── hooks/              # Custom React hooks (e.g., useAuth, useWebSocket)
+│   │   ├── store/              # Global state management (Zustand or Redux)
+│   │   ├── services/           # API interaction layer (Axios/Fetch wrappers)
+│   │   ├── lib/                # Utility libraries (e.g., date formatting, validation)
+│   │   ├── types/              # Global TypeScript interfaces & types
+│   │   └── styles/             # Global CSS and Tailwind configurations
+│   ├── next.config.mjs         # Next.js configuration
+│   ├── tailwind.config.ts      # Tailwind CSS configuration
+│   └── package.json            # Frontend dependencies
+│
+├── server/                     # Backend (Node.js, Express, Socket.io)
+│   ├── src/
+│   │   ├── api/                # API route controllers & definitions
+│   │   │   ├── auth/           # Authentication endpoints (Login, Signup, OAuth)
+│   │   │   ├── users/          # User management endpoints
+│   │   │   ├── posts/          # Post creation and retrieval endpoints
+│   │   │   └── chat/           # Chat history endpoints
+│   │   ├── config/             # Environment variables & third-party setup (DBs, AWS)
+│   │   ├── middleware/         # Express middlewares (Auth guard, Rate limiter, Error handler)
+│   │   ├── models/             # Database schemas
+│   │   │   ├── postgres/       # Relational models (Users, Friendships)
+│   │   │   └── mongo/          # Document models (Posts, Comments, Messages)
+│   │   ├── services/           # Core business logic (keeps controllers thin)
+│   │   │   ├── ai/             # AI integration logic (Content moderation, suggestions)
+│   │   │   ├── cache/          # Redis caching implementation
+│   │   │   └── notifications/  # Notification logic
+│   │   ├── sockets/            # Socket.io event handlers (Real-time features)
+│   │   ├── utils/              # Helper functions (JWT sign, hash password, formatters)
+│   │   ├── app.ts              # Express application setup
+│   │   └── server.ts           # Server entry point (starts Express & Websockets)
+│   ├── Dockerfile              # Docker config for the backend
+│   └── package.json            # Backend dependencies
+│
+├── docker-compose.yml          # Local development orchestrator (DBs, Redis, Server, Client)
+├── .env.example                # Example environment variables required for the project
+└── README.md                   # Project documentation and setup instructions

@@ -1,0 +1,3 @@
+@echo off
+echo Opening FriendLoop in your default browser...
+start http://localhost:3000
