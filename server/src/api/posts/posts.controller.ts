@@ -240,7 +240,8 @@ export const deletePost = async (req: AuthRequest, res: Response) => {
             return res.status(404).json({ message: 'Post not found' });
         }
 
-        if (post.author_id.toString() !== String(req.userId)) {
+        // Use String conversion for robust comparison (handles Number vs String IDs)
+        if (String(post.author_id) !== String(req.userId)) {
             return res.status(403).json({ message: 'Not authorized to delete this post' });
         }
 

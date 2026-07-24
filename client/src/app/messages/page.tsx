@@ -9,6 +9,7 @@ import { io, Socket } from 'socket.io-client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Search, Send, MessageSquare, Trash2 } from 'lucide-react';
+import { ComicModal } from '@/components/ui/ComicModal';
 
 export default function MessagesPage() {
   const { isAuthenticated, user, checkAuth, isLoading: authLoading, token } = useAuthStore();
@@ -21,6 +22,9 @@ export default function MessagesPage() {
   const [inputMessage, setInputMessage] = useState('');
   const [typingUsers, setTypingUsers] = useState<string[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  
+  const [showClearModal, setShowClearModal] = useState(false);
+  const [isClearing, setIsClearing] = useState(false);
 
   useEffect(() => {
     checkAuth();
@@ -118,6 +122,22 @@ export default function MessagesPage() {
     
     socket.emit('typing_stop', { receiverId: selectedFriend.id });
     setInputMessage('');
+  };
+  
+  const handleClearChat = async () => {
+    if (!selectedFriend) return;
+    
+    setShowClearModal(false);
+    setIsClearing(true);
+    try {
+      await api.delete(`/chat/${selectedFriend.id}`);
+      setMessages([]);
+    } catch (error) {
+      console.error("Failed to clear chat", error);
+      alert("Failed to clear chat");
+    } finally {
+      setIsClearing(false);
+    }
   };
 
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -222,20 +242,12 @@ export default function MessagesPage() {
                   <Button 
                     variant="ghost" 
                     size="sm" 
-                    onClick={async () => {
-                        if (confirm(`Clear all messages with ${selectedFriend.first_name}?`)) {
-                            try {
-                                await api.delete(`/chat/${selectedFriend?.id}`);
-                                setMessages([]);
-                            } catch (error) {
-                                console.error("Failed to clear chat", error);
-                            }
-                        }
-                    }} 
+                    onClick={() => setShowClearModal(true)} 
+                    disabled={isClearing}
                     className="text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors"
                   >
                     <Trash2 className="w-4 h-4 mr-2" />
-                    Clear Chat
+                    {isClearing ? 'Clearing...' : 'Clear Chat'}
                   </Button>
                 </div>
                 
@@ -295,6 +307,17 @@ export default function MessagesPage() {
           </div>
         </div>
       </main>
+
+      <ComicModal
+        isOpen={showClearModal}
+        onClose={() => setShowClearModal(false)}
+        onConfirm={handleClearChat}
+        title="Clear Chat?"
+        message={`Are you sure you want to POW! clear all messages with ${selectedFriend?.first_name}? This action cannot be undone!`}
+        confirmText="Yes, POW! Clear"
+        cancelText="No, Keep it"
+        type="danger"
+      />
     </div>
   );
 }

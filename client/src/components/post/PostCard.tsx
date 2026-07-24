@@ -6,6 +6,7 @@ import { Button } from '../ui/button';
 import { Heart, MessageCircle, MoreHorizontal, Trash2, Edit2, Bookmark, X, Check } from 'lucide-react';
 import api from '@/services/api';
 import { useAuthStore } from '@/store/authStore';
+import { ComicModal } from '../ui/ComicModal';
 
 interface PostProps {
   post: {
@@ -39,6 +40,8 @@ export default function PostCard({ post, onDelete }: PostProps) {
   const [comments, setComments] = useState<any[]>([]);
   const [commentText, setCommentText] = useState('');
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+  
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(post.content);
@@ -127,8 +130,7 @@ export default function PostCard({ post, onDelete }: PostProps) {
   };
 
   const handleDelete = async () => {
-    if (!window.confirm('Are you sure you want to delete this post?')) return;
-
+    setShowDeleteModal(false);
     setIsDeleting(true);
     try {
       await api.delete(`/posts/${post._id}`);
@@ -193,7 +195,7 @@ export default function PostCard({ post, onDelete }: PostProps) {
             <button
               type="button"
               className="animated-delete-btn"
-              onClick={handleDelete}
+              onClick={() => setShowDeleteModal(true)}
               disabled={isDeleting}
             >
               <span className="icon-wrapper">
@@ -338,6 +340,17 @@ export default function PostCard({ post, onDelete }: PostProps) {
           </div>
         )}
       </CardFooter>
+
+      <ComicModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDelete}
+        title="Delete Post?"
+        message="Are you sure you want to web-throw this post into the trash? This action cannot be undone!"
+        confirmText="Yes, POW! Delete"
+        cancelText="No, Keep it"
+        type="danger"
+      />
     </Card>
   );
 }
