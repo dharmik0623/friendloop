@@ -10,7 +10,7 @@
 [![Redis](https://img.shields.io/badge/Redis-7.0-DC382D?style=for-the-badge&logo=redis)](https://redis.io/)
 [![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=for-the-badge&logo=docker)](https://www.docker.com/)
 
-FriendLoop is a full-stack, real-time, AI-enhanced social networking web application built with modern web technologies. It features dynamic feed feeds, rich media sharing, live bidirectional messaging, intelligent content moderation, and multi-database persistence optimized for speed and scaling.
+FriendLoop is a full-stack, real-time social networking web application built with modern web technologies. It features dynamic content feeds, rich media sharing, live bidirectional messaging, automated content moderation, and multi-database persistence optimized for speed and scaling.
 
 ---
 
@@ -45,7 +45,7 @@ flowchart TD
     subgraph Server ["Backend (Node.js & Express API)"]
         API[Express REST API Controller]
         Auth[JWT Middleware]
-        Mod[AI Content Moderation Service]
+        Mod[Content Moderation Service]
         SocketServer[Socket.io Real-Time Engine]
     end
 
@@ -99,7 +99,7 @@ flowchart TD
 | 📸 **Rich Media Posting** | Create, edit, delete posts with images, text, and rich formatting. | MongoDB document storage with `multer` disk storage service. |
 | ❤️ **Interactions & Bookmarks** | Real-time likes, dynamic commenting, and post saving. | Atomic update operations on MongoDB array fields (`likes`, `bookmarks`). |
 | 💬 **Instant Messaging** | Real-time direct messaging with typing indicators and online badges. | Bidirectional WebSocket communication powered by Socket.io. |
-| 🛡️ **AI Content Moderation** | Automated filter detecting toxic or inappropriate text before saving. | Pipeline interceptor analyzing content against toxicity guidelines. |
+| 🛡️ **Automated Moderation** | Automated filter detecting toxic or inappropriate text before saving. | Pipeline interceptor analyzing content against moderation guidelines. |
 
 ---
 
@@ -119,7 +119,7 @@ friendloop1/
 │   │   ├── api/                # Controllers & Routes (Auth, Posts, Friends, Chat)
 │   │   ├── config/             # DB Connections (PG, Mongo, Redis)
 │   │   ├── middleware/         # Auth verification & file uploaders
-│   │   └── services/           # AI Moderation & Socket event handlers
+│   │   └── services/           # Content Moderation & Socket event handlers
 │   └── package.json
 ├── docker-compose.yml          # Container configuration for DBs
 ├── Start_Servers.bat           # Windows quick-start runner script

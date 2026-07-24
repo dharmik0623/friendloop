@@ -35,7 +35,7 @@ friendloop/
 │   │   │   ├── postgres/       # Relational models (Users, Friendships)
 │   │   │   └── mongo/          # Document models (Posts, Comments, Messages)
 │   │   ├── services/           # Core business logic (keeps controllers thin)
-│   │   │   ├── ai/             # AI integration logic (Content moderation, suggestions)
+│   │   │   ├── moderation/     # Moderation logic (Content filtering, rules engine)
 │   │   │   ├── cache/          # Redis caching implementation
 │   │   │   └── notifications/  # Notification logic
 │   │   ├── sockets/            # Socket.io event handlers (Real-time features)
