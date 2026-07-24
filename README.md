@@ -187,27 +187,7 @@ npm run dev
 ```
 The client will launch on `http://localhost:3000`.
 
----
 
-## 🔗 GitHub Upload Instructions
-
-If you haven't published this repository to your GitHub account yet, follow these simple steps:
-
-1. **Create a new repository on GitHub**:
-   - Go to [GitHub New Repository](https://github.com/new).
-   - Name it `friendloop` (or your preferred name).
-   - Do **NOT** check "Initialize with README" or `.gitignore` (as they are already in this repo).
-
-2. **Connect local repo to GitHub & push**:
-   Run the following commands in your project root terminal:
-   ```bash
-   git branch -M main
-   git remote add origin https://github.com/YOUR_USERNAME/friendloop.git
-   git push -u origin main
-   ```
-   *(Replace `YOUR_USERNAME` with your actual GitHub username).*
-
----
 
 ## 📜 License & Author
 
