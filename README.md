@@ -1,78 +1,214 @@
-# FriendLoop — Social Media Application
+# 🌀 FriendLoop — Modern Real-Time Social Platform
 
-A scalable, real-time, AI-enhanced social networking platform designed to showcase full-stack engineering skills.
+[![Next.js](https://img.shields.io/badge/Next.js-15.1-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
+[![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3.4-38B2AC?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com/)
+[![Node.js](https://img.shields.io/badge/Node.js-18+-green?style=for-the-badge&logo=nodedotjs)](https://nodejs.org/)
+[![Express.js](https://img.shields.io/badge/Express.js-4.18-000000?style=for-the-badge&logo=express)](https://expressjs.com/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-336791?style=for-the-badge&logo=postgresql)](https://www.postgresql.org/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-6.0-47A248?style=for-the-badge&logo=mongodb)](https://www.mongodb.com/)
+[![Redis](https://img.shields.io/badge/Redis-7.0-DC382D?style=for-the-badge&logo=redis)](https://redis.io/)
+[![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=for-the-badge&logo=docker)](https://www.docker.com/)
 
-## Architecture
+FriendLoop is a full-stack, real-time, AI-enhanced social networking web application built with modern web technologies. It features dynamic feed feeds, rich media sharing, live bidirectional messaging, intelligent content moderation, and multi-database persistence optimized for speed and scaling.
 
-This project is separated into a Next.js `client` and a Node.js/Express `server`.
-It uses PostgreSQL for relational data (the social graph), MongoDB for unstructured post content, and Redis for caching.
+---
 
-## Tech Stack
-- **Frontend**: Next.js (App Router), TypeScript, Tailwind CSS, Zustand/Redux
-- **Backend**: Node.js, Express, Socket.io
-- **Databases**: PostgreSQL, MongoDB, Redis
-- **Infra**: Docker, Docker Compose
+## 📑 Table of Contents
+- [Architecture Overview](#-architecture-overview)
+- [Tech Stack](#-tech-stack)
+- [Key Features](#-key-features)
+- [System Requirements](#-system-requirements)
+- [Project Structure](#-project-structure)
+- [Environment Configuration](#-environment-configuration)
+- [Getting Started](#-getting-started)
+- [API Overview](#-api-overview)
+- [License & Author](#-license--author)
 
-## 💻 Hardware & Software Requirements
+---
 
-### Hardware Requirements
-- **Processor**: Multi-core CPU (e.g., Intel i5/AMD Ryzen 5 or better recommended for running multiple containers).
-- **RAM**: Minimum 8GB (16GB recommended as Docker, Next.js, and Node.js are memory-intensive).
-- **Storage**: At least 5GB of free disk space for dependencies and Docker images.
+## 🏗️ Architecture Overview
 
-### Software Requirements
-- **OS**: Windows 10/11, macOS, or Linux.
-- **Node.js**: v18.0.0 or higher.
-- **Docker & Docker Compose**: Required for spinning up the local PostgreSQL, MongoDB, and Redis databases.
-- **Git**: For version control cloning.
+FriendLoop uses a hybrid database strategy:
+- **PostgreSQL**: Manages structured relational data (Users, Auth, Social Graph, Friendships).
+- **MongoDB**: Handles unstructured media-rich content (Posts, Comments, Likes, Bookmarks).
+- **Redis**: Caching layer for high-throughput feed caching and active session state.
 
-## ✨ Detailed Features & How They Work
+```mermaid
+flowchart TD
+    subgraph Client ["Frontend (Next.js 15 App Router)"]
+        UI[React UI / Tailwind CSS]
+        State[Zustand State Store]
+        SocketClient[Socket.io Client]
+    end
 
-### 1. User Authentication (JWT)
-- **What it does**: Allows users to securely register, log in, and maintain a session.
-- **How it works**: When a user logs in, the Node.js API verifies credentials against the PostgreSQL database using `bcrypt`. A JSON Web Token (JWT) is signed and returned to the client, which stores it securely. Every subsequent request from the React frontend includes this token via an Axios interceptor to authenticate the user.
+    subgraph Server ["Backend (Node.js & Express API)"]
+        API[Express REST API Controller]
+        Auth[JWT Middleware]
+        Mod[AI Content Moderation Service]
+        SocketServer[Socket.io Real-Time Engine]
+    end
 
-### 2. Social Graph & Networking
-- **What it does**: Users can find friends, send friend requests, and curate their feed.
-- **How it works**: Friendships are modeled relationally in **PostgreSQL**. The `friendships` table tracks the initiator, receiver, and request status (pending/accepted). Only posts from accepted friends (or the user's own posts) are aggregated when generating the main feed.
+    subgraph DataLayer ["Data & Persistence Layer"]
+        PG[(PostgreSQL - Social Graph & Auth)]
+        Mongo[(MongoDB - Posts & Comments)]
+        RedisCache[(Redis - Feed Cache)]
+    end
 
-### 3. Rich Media Post Management
-- **What it does**: Users can create posts containing text, images, and videos. They can also edit their post text or delete the post entirely.
-- **How it works**: Posts are treated as unstructured documents and are saved in **MongoDB**. Media files are handled by the `multer` middleware on the Node.js server, saved directly to the host machine's `/uploads` folder, and served statically. When an author deletes a post, a backend mechanism immediately wipes the document from MongoDB and invalidates the **Redis** feed cache so the deleted post doesn't reappear on browser refresh.
+    UI -->|HTTP Requests / Axios| API
+    UI <-->|Bidirectional Websockets| SocketServer
+    API --> Auth
+    API --> Mod
+    API --> PG
+    API --> Mongo
+    API <--> RedisCache
+```
 
-### 4. Interactive Feed (Likes, Comments, Bookmarks)
-- **What it does**: Users can interact with feed content and save items for later viewing.
-- **How it works**: Arrays on the MongoDB Post document store exactly which users have liked or bookmarked a post. A dedicated `app/saved` page queries the backend specifically for posts containing the current user's ID in the `bookmarks` array, dynamically displaying a curated collection of saved items.
+---
 
-### 5. Real-Time Communication
-- **What it does**: Users can instantly message their friends and see live "typing..." indicators.
-- **How it works**: A bidirectional connection is established via **Socket.io**. The server tracks the socket IDs associated with authenticated user IDs. When User A types or sends a message, an event is emitted directly to User B's socket without writing to the database first, enabling instant UI updates.
+## 💻 Tech Stack
 
-### 6. Automated Smart Moderation
-- **What it does**: Identifies and blocks inappropriate or spammy content from being posted.
-- **How it works**: A mock AI service integration intercepts the post creation and edit routes. It scans the payload against a local pattern dictionary (or an external API) and halts the database injection if a violation is detected, returning a `403` status to the frontend.
+### Frontend
+- **Framework**: Next.js 15 (App Router, Server Components)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS & Lucide Icons
+- **State Management**: Zustand
+- **Real-Time Client**: Socket.io-client
 
-## Quick Start
+### Backend
+- **Runtime**: Node.js (v18+)
+- **Framework**: Express.js
+- **Real-Time Engine**: Socket.io
+- **ORM / ODM**: Prisma / Mongoose / Native Drivers
+- **Authentication**: JWT & Bcrypt
 
-### 1. Start the Databases
-Ensure Docker is running and run:
+### Data & Infrastructure
+- **Relational DB**: PostgreSQL
+- **Document DB**: MongoDB
+- **In-Memory Cache**: Redis
+- **Containerization**: Docker & Docker Compose
+
+---
+
+## ✨ Key Features
+
+| Feature | Description | Technical Implementation |
+|---|---|---|
+| 🔐 **User Authentication** | Secure registration, login, token management, and session guard. | JWT with HttpOnly storage capabilities & password hashing via Bcrypt. |
+| 👥 **Social Graph & Friends** | Friend requests, approval workflows, mutual connections, and suggestions. | Relational `friendships` schema in PostgreSQL with status states (`pending`, `accepted`). |
+| 📸 **Rich Media Posting** | Create, edit, delete posts with images, text, and rich formatting. | MongoDB document storage with `multer` disk storage service. |
+| ❤️ **Interactions & Bookmarks** | Real-time likes, dynamic commenting, and post saving. | Atomic update operations on MongoDB array fields (`likes`, `bookmarks`). |
+| 💬 **Instant Messaging** | Real-time direct messaging with typing indicators and online badges. | Bidirectional WebSocket communication powered by Socket.io. |
+| 🛡️ **AI Content Moderation** | Automated filter detecting toxic or inappropriate text before saving. | Pipeline interceptor analyzing content against toxicity guidelines. |
+
+---
+
+## 📁 Project Structure
+
+```
+friendloop1/
+├── client/                     # Next.js Frontend Application
+│   ├── src/
+│   │   ├── app/                # App Router Pages (Feed, Messages, Profile, Saved)
+│   │   ├── components/         # Reusable UI components & modals
+│   │   ├── lib/                # API client helpers & socket connectors
+│   │   └── store/              # Zustand global state management
+│   └── package.json
+├── server/                     # Node.js Express Backend API
+│   ├── src/
+│   │   ├── api/                # Controllers & Routes (Auth, Posts, Friends, Chat)
+│   │   ├── config/             # DB Connections (PG, Mongo, Redis)
+│   │   ├── middleware/         # Auth verification & file uploaders
+│   │   └── services/           # AI Moderation & Socket event handlers
+│   └── package.json
+├── docker-compose.yml          # Container configuration for DBs
+├── Start_Servers.bat           # Windows quick-start runner script
+└── README.md
+```
+
+---
+
+## ⚙️ Environment Configuration
+
+Create `.env` files in both the `client/` and `server/` directories based on the example templates:
+
+### Backend (`server/.env`)
+```env
+PORT=5000
+NODE_ENV=development
+JWT_SECRET=your_jwt_secret_key_here
+POSTGRES_URL=postgresql://postgres:postgres@localhost:5432/friendloop
+MONGODB_URI=mongodb://localhost:27017/friendloop
+REDIS_URL=redis://localhost:6379
+```
+
+### Frontend (`client/.env.local`)
+```env
+NEXT_PUBLIC_API_URL=http://localhost:5000/api
+NEXT_PUBLIC_SOCKET_URL=http://localhost:5000
+```
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+Make sure you have installed:
+- [Node.js (v18+)](https://nodejs.org/)
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+- [Git](https://git-scm.com/)
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/YOUR_USERNAME/friendloop.git
+cd friendloop
+```
+
+### 2. Start the Databases (Docker)
+Spin up PostgreSQL, MongoDB, and Redis in isolated containers:
 ```bash
 docker-compose up -d
 ```
 
-### 2. Configure Environment variables
-Copy `.env.example` to `.env` in both `client` and `server` directories and adjust values appropriately.
-
-### 3. Start the Backend Server
+### 3. Install & Run Backend Server
 ```bash
 cd server
 npm install
 npm run dev
 ```
+The server will run on `http://localhost:5000`.
 
-### 4. Start the Frontend Application
+### 4. Install & Run Frontend Client
+In a new terminal:
 ```bash
 cd client
 npm install
 npm run dev
 ```
+The client will launch on `http://localhost:3000`.
+
+---
+
+## 🔗 GitHub Upload Instructions
+
+If you haven't published this repository to your GitHub account yet, follow these simple steps:
+
+1. **Create a new repository on GitHub**:
+   - Go to [GitHub New Repository](https://github.com/new).
+   - Name it `friendloop` (or your preferred name).
+   - Do **NOT** check "Initialize with README" or `.gitignore` (as they are already in this repo).
+
+2. **Connect local repo to GitHub & push**:
+   Run the following commands in your project root terminal:
+   ```bash
+   git branch -M main
+   git remote add origin https://github.com/YOUR_USERNAME/friendloop.git
+   git push -u origin main
+   ```
+   *(Replace `YOUR_USERNAME` with your actual GitHub username).*
+
+---
+
+## 📜 License & Author
+
+Developed by **[Dharmik](https://github.com/dharmik0623)**. Built for performance, scalability, and modern UX standards.
